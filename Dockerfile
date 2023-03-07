@@ -10,6 +10,8 @@ RUN apt update -y \
     && apt clean \
     && rm -rf /var/lib/apt/lists/*
 
+RUN mkdir ./staticfiles
+
 COPY requirements.txt .
 
 RUN pip install -U pip &&\
