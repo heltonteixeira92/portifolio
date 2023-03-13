@@ -9,7 +9,7 @@ services:
     env_file: .env
     depends_on:
       - postgres
-    command: wait-for-it postgres:5432 -- gunicorn.wsgi:application --bind 0.0.0.0:8000
+    command: wait-for-it postgres:5432 -- gunicorn core.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - .:/app
 
