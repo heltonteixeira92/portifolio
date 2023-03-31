@@ -1,40 +1,68 @@
-version: '3'
+version: '3.8'
 
 services:
-  app:
-    build: .
-    image: portifolio
-    expose:
-      - 8000
-    env_file: .env
-    depends_on:
-      - postgres
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
     command: wait-for-it postgres:5432 -- gunicorn core.wsgi:application --bind 0.0.0.0:8000
     volumes:
-      - .:/app
+      - static_volume:/home/app/web/staticfiles
+      - media_volume:/home/app/web/mediafiles
+    expose:
+      - 8000
+    env_file:
+      - ./.env.prod
+
+    depends_on:
+      - postgres
 
   postgres:
-    image: postgres
+    image: library/postgres:13.4-buster
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
     ports:
       - 5432:5432
-    volumes:
-      - postgres:/var/lib/postgresql/data
-    environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
-    # healthcheck:
-    #   test: pg_isready -U devpro-rest
-    #   interval: 2s
-    #   timeout: 10s
-    #   retries: 5
-    #   start_period: 3s
+    env_file:
+      - ./.env.prod.db
 
-  nginx:
-    build: ./nginx
+  nginx-proxy:
+    container_name: nginx-proxy
+    build: nginx
+    restart: always
     ports:
-      - 1337:80
+      - 443:443
+      - 80:80
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+      - media_volume:/home/app/web/mediafiles
+      - certs:/etc/nginx/certs
+      - html:/usr/share/nginx/html
+      - vhost:/etc/nginx/vhost.d
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
     depends_on:
-      - app
+      - web
+
+  nginx-proxy-letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    env_file:
+      - ./.env.prod.proxy-companion
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - html:/usr/share/nginx/html
+      - vhost:/etc/nginx/vhost.d
+      - acme:/etc/acme.sh
+    depends_on:
+      - nginx-proxy
 
 volumes:
-  postgres:
+  postgres_data:
+  static_volume:
+  media_volume:
+  certs:
+  html:
+  vhost:
+  acme:

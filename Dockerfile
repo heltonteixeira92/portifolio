@@ -1,6 +1,10 @@
 FROM python:3.6-slim-buster
 
-WORKDIR /app
+WORKDIR /usr/src/app
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
 RUN apt update -y \
     && apt install -y --no-install-recommends \
