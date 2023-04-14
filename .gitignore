@@ -116,6 +116,11 @@ venv.bak/
 .env.prod.db
 .env.prod.proxy-companion
 
+# Docker Prod Environments
+.env.prod
+.env.prod.db
+.env.prod.proxy-companion
+
 # Spyder project settings
 .spyderproject
 .spyproject
