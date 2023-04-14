@@ -112,9 +112,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-.env.prod
-.env.prod.db
-.env.prod.proxy-companion
 
 # Docker Prod Environments
 .env.prod
